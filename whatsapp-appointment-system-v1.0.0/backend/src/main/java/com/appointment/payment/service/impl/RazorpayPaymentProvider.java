@@ -1,5 +1,6 @@
 package com.appointment.payment.service.impl;
 
+import java.math.BigDecimal;  // This import is already there
 import com.appointment.payment.dto.PaymentLinkRequest;
 import com.appointment.payment.dto.PaymentLinkResponse;
 import com.appointment.payment.dto.WebhookPayload;
@@ -15,7 +16,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
@@ -28,7 +28,7 @@ import java.util.Base64;
 @Slf4j
 @Service
 public class RazorpayPaymentProvider implements PaymentProvider {
-    
+
     private final RazorpayClient razorpayClient;
     private final String webhookSecret;
     private final ObjectMapper objectMapper;
@@ -46,7 +46,7 @@ public class RazorpayPaymentProvider implements PaymentProvider {
     public PaymentLinkResponse createPaymentLink(PaymentLinkRequest request) {
         try {
             JSONObject paymentLinkRequest = new JSONObject();
-            paymentLinkRequest.put("amount", request.getAmount().multiply(new java.math.BigDecimal("100")).longValue()); // Convert to paise
+            paymentLinkRequest.put("amount", request.getAmount().multiply(new BigDecimal("100")).longValue()); // Convert to paise
             paymentLinkRequest.put("currency", request.getCurrency());
             paymentLinkRequest.put("description", request.getDescription());
             paymentLinkRequest.put("customer", new JSONObject()
@@ -214,4 +214,3 @@ public class RazorpayPaymentProvider implements PaymentProvider {
         return "RAZORPAY";
     }
 }
-

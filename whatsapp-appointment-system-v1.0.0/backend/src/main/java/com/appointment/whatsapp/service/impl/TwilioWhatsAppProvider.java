@@ -9,6 +9,8 @@ import com.twilio.type.PhoneNumber;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import com.twilio.rest.api.v2010.account.MessageCreator;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -124,12 +126,19 @@ public class TwilioWhatsAppProvider implements WhatsAppProvider {
     @Override
     public MessageResponse sendMedia(MessageRequest request, String mediaUrl, String mediaType, String caption) {
         try {
-            Message message = Message.creator(
+            // For WhatsApp media messages, use the creator with media URLs
+            MessageCreator creator = Message.creator(
                     new PhoneNumber(request.getTo()),
-                    new PhoneNumber(fromNumber)
-            ).setMediaUrl(java.util.Arrays.asList(new java.net.URI(mediaUrl)))
-             .setBody(caption != null ? caption : "")
-             .create();
+                    new PhoneNumber(fromNumber),
+                    java.util.Arrays.asList(new java.net.URI(mediaUrl))
+            );
+            
+            // Set caption as body if provided
+            if (caption != null && !caption.isEmpty()) {
+                creator.setBody(caption);
+            }
+            
+            Message message = creator.create();
             
             return MessageResponse.builder()
                     .success(true)
