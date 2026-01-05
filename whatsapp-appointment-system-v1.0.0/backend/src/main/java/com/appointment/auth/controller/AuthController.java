@@ -23,6 +23,8 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     
+    private final com.appointment.booking.repository.AvailabilityRepository availabilityRepository;
+
     @PostMapping("/login")
     @Operation(summary = "Login", description = "Authenticates user and returns JWT token")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
@@ -45,6 +47,56 @@ public class AuthController {
                 .role(user.getRole().name())
                 .userId(user.getId())
                 .build());
+    }
+
+    @PostMapping("/register")
+    @Operation(summary = "Register", description = "Registers a new user (Patient or Doctor)")
+    public ResponseEntity<?> register(@Valid @RequestBody com.appointment.auth.dto.RegisterRequest request) {
+        if (userRepository.findByUsername(request.getUsername()).isPresent()) {
+            return ResponseEntity.badRequest().body("Username already exists");
+        }
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            return ResponseEntity.badRequest().body("Email already exists");
+        }
+
+        User.UserRole role = request.getRole() != null ? request.getRole() : User.UserRole.PATIENT;
+
+        User user = User.builder()
+                .username(request.getUsername())
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .name(request.getName())
+                .phone(request.getPhone())
+                .role(role)
+                .isActive(true)
+                // Doctor specific fields
+                .specializationId(request.getSpecializationId())
+                .qualification(request.getQualification())
+                .consultationFee(request.getConsultationFee())
+                .experienceYears(request.getExperienceYears())
+                .bio(request.getBio())
+                .build();
+
+        user = userRepository.save(user);
+
+        if (user.getRole() == User.UserRole.DOCTOR) {
+            java.util.List<com.appointment.booking.model.Availability> availabilities = new java.util.ArrayList<>();
+            for (java.time.DayOfWeek day : java.time.DayOfWeek.values()) {
+                if (day != java.time.DayOfWeek.SATURDAY && day != java.time.DayOfWeek.SUNDAY) { // Mon-Fri
+                    availabilities.add(com.appointment.booking.model.Availability.builder()
+                            .doctorId(user.getId())
+                            .dayOfWeek(day)
+                            .startTime(java.time.LocalTime.of(9, 0))
+                            .endTime(java.time.LocalTime.of(17, 0))
+                            .slotDurationMinutes(30)
+                            .isActive(true)
+                            .build());
+                }
+            }
+            availabilityRepository.saveAll(availabilities);
+        }
+
+        return ResponseEntity.ok("User registered successfully");
     }
 }
 

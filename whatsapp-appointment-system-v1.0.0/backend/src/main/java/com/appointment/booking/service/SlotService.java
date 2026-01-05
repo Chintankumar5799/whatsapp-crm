@@ -73,15 +73,20 @@ public class SlotService {
         List<Availability> availabilities = availabilityRepository
                 .findByDoctorIdAndDayOfWeek(doctorId, dayOfWeek);
         
-        for (Availability availability : availabilities) {
-            if (availability.getIsActive()) {
-                generateSlotsForTimeRange(
-                        doctorId,
-                        date,
-                        availability.getStartTime(),
-                        availability.getEndTime(),
-                        availability.getSlotDurationMinutes()
-                );
+        if (availabilities.isEmpty()) {
+            // Default availability: 09:00 - 17:00 if not configured
+            generateSlotsForTimeRange(doctorId, date, LocalTime.of(9, 0), LocalTime.of(17, 0), 30);
+        } else {
+            for (Availability availability : availabilities) {
+                if (availability.getIsActive()) {
+                    generateSlotsForTimeRange(
+                            doctorId,
+                            date,
+                            availability.getStartTime(),
+                            availability.getEndTime(),
+                            availability.getSlotDurationMinutes()
+                    );
+                }
             }
         }
     }

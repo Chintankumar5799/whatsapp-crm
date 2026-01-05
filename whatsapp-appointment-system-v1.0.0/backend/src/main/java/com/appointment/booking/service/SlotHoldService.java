@@ -92,9 +92,14 @@ public class SlotHoldService {
      * @return true if slot has an active hold
      */
     public boolean hasActiveHold(Long slotId) {
-        String pattern = HOLD_KEY_PREFIX + slotId + ":*";
-        Set<String> keys = redisTemplate.keys(pattern);
-        return keys != null && !keys.isEmpty();
+        try {
+            String pattern = HOLD_KEY_PREFIX + slotId + ":*";
+            Set<String> keys = redisTemplate.keys(pattern);
+            return keys != null && !keys.isEmpty();
+        } catch (Exception e) {
+            log.error("Redis error in hasActiveHold: {}", e.getMessage());
+            return false;
+        }
     }
     
     /**
@@ -103,14 +108,19 @@ public class SlotHoldService {
      * @return Set of hold tokens
      */
     public Set<String> getActiveHolds(Long slotId) {
-        String pattern = HOLD_KEY_PREFIX + slotId + ":*";
-        Set<String> keys = redisTemplate.keys(pattern);
-        if (keys == null) {
+        try {
+            String pattern = HOLD_KEY_PREFIX + slotId + ":*";
+            Set<String> keys = redisTemplate.keys(pattern);
+            if (keys == null) {
+                return Set.of();
+            }
+            return keys.stream()
+                    .map(key -> key.substring(key.lastIndexOf(':') + 1))
+                    .collect(java.util.stream.Collectors.toSet());
+        } catch (Exception e) {
+            log.error("Redis error in getActiveHolds: {}", e.getMessage());
             return Set.of();
         }
-        return keys.stream()
-                .map(key -> key.substring(key.lastIndexOf(':') + 1))
-                .collect(java.util.stream.Collectors.toSet());
     }
     
     /**

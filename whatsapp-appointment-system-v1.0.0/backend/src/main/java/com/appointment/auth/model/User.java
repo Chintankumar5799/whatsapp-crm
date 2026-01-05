@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "users")
@@ -36,11 +37,30 @@ public class User {
     private UserRole role;
 
     @Column(name = "doctor_id")
-    private Long doctorId; // If role is DOCTOR
+    private Long doctorId; // Legacy or external reference
 
     @Column(name = "is_active", nullable = false)
     @Builder.Default
     private Boolean isActive = true;
+
+    // --- New Fields for Single Table Inheritance ---
+    @Column(name = "name")
+    private String name;
+
+    @Column(name = "specialization_id")
+    private Long specializationId;
+
+    @Column(name = "qualification")
+    private String qualification;
+
+    @Column(name = "experience_years")
+    private Integer experienceYears;
+
+    @Column(name = "consultation_fee")
+    private BigDecimal consultationFee;
+
+    @Column(name = "bio", columnDefinition = "TEXT")
+    private String bio;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -66,4 +86,3 @@ public class User {
         PATIENT
     }
 }
-

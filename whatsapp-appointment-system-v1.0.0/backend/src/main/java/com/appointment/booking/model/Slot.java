@@ -61,5 +61,9 @@ public class Slot {
         BOOKED,
         CANCELLED
     }
+
+    public boolean getIsAvailable() {
+        return this.status == SlotStatus.AVAILABLE;
+    }
 }
 

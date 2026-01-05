@@ -12,16 +12,29 @@ import org.springframework.context.annotation.Primary;
 @Configuration
 public class PaymentConfig {
     
+    // @Bean
+    // @Primary
+    // public PaymentProvider razorpayPaymentProvider(
+    //         @Value("${payment.razorpay.key-id:}") String razorpayKeyId,
+    //         @Value("${payment.razorpay.key-secret:}") String razorpayKeySecret,
+    //         @Value("${payment.razorpay.webhook-secret:}") String razorpayWebhookSecret) {
+    //     try {
+    //         return new RazorpayPaymentProvider(razorpayKeyId, razorpayKeySecret, razorpayWebhookSecret);
+    //     } catch (Exception e) {
+    //         log.error("Failed to initialize Razorpay payment provider", e);
+    //         throw new RuntimeException("Payment provider initialization failed", e);
+    //     }
+    // }
+
     @Bean
     @Primary
-    public PaymentProvider paymentProvider(
-            @Value("${payment.razorpay.key-id:}") String razorpayKeyId,
-            @Value("${payment.razorpay.key-secret:}") String razorpayKeySecret,
-            @Value("${payment.razorpay.webhook-secret:}") String razorpayWebhookSecret) {
+    public PaymentProvider activePaymentProvider(
+            @Value("${payment.stripe.api-key:}") String stripeApiKey,
+            @Value("${payment.stripe.webhook-secret:}") String stripeWebhookSecret) {
         try {
-            return new RazorpayPaymentProvider(razorpayKeyId, razorpayKeySecret, razorpayWebhookSecret);
+            return new com.appointment.payment.service.impl.StripePaymentProvider(stripeApiKey, stripeWebhookSecret);
         } catch (Exception e) {
-            log.error("Failed to initialize Razorpay payment provider", e);
+            log.error("Failed to initialize Stripe payment provider", e);
             throw new RuntimeException("Payment provider initialization failed", e);
         }
     }

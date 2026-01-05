@@ -6,6 +6,7 @@ import com.appointment.payment.dto.WebhookPayload;
 import com.appointment.payment.model.Payment;
 import com.appointment.payment.model.PaymentStatus;
 import com.appointment.payment.repository.PaymentRepository;
+import com.appointment.payment.repository.InvoiceRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,6 +27,9 @@ class PaymentServiceTest {
     
     @Mock
     private PaymentRepository paymentRepository;
+
+    @Mock
+    private InvoiceRepository invoiceRepository;
     
     @Mock
     private PaymentProvider paymentProvider;
@@ -120,7 +124,8 @@ class PaymentServiceTest {
         
         when(paymentRepository.findByPaymentLinkId("plink_123456")).thenReturn(Optional.of(payment));
         when(paymentRepository.save(any(Payment.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        
+        when(invoiceRepository.findByPaymentId(payment.getId())).thenReturn(java.util.Collections.emptyList());
+
         // When
         paymentService.processWebhook(webhookPayload);
         
@@ -137,7 +142,7 @@ class PaymentServiceTest {
                 .build();
         
         when(paymentRepository.findByPaymentLinkId("plink_999999")).thenReturn(Optional.empty());
-        when(paymentRepository.findByProviderPaymentId(any())).thenReturn(Optional.empty());
+        // Removed unnecessary stubbing for findByProviderPaymentId
         
         // When
         paymentService.processWebhook(webhookPayload);

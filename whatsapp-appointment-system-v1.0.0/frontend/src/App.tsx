@@ -4,6 +4,7 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
+import PendingRequests from './pages/PendingRequests';
 import Appointments from './pages/Appointments';
 import Availability from './pages/Availability';
 import Billing from './pages/Billing';
@@ -32,6 +33,14 @@ function App() {
             element={
               <PrivateRoute>
                 <Dashboard />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/pending-requests"
+            element={
+              <PrivateRoute>
+                <PendingRequests />
               </PrivateRoute>
             }
           />

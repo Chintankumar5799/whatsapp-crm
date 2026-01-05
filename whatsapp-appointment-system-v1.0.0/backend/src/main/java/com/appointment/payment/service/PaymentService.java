@@ -37,33 +37,39 @@ public class PaymentService {
     public PaymentLinkResponse createPaymentLink(PaymentLinkRequest request) {
         log.info("Creating payment link for booking: {}", request.getBookingId());
         
-        // Check if payment already exists
-        List<Payment> existingPayments = paymentRepository.findByBookingIdAndStatus(
-                request.getBookingId(), PaymentStatus.SUCCESS);
-        if (!existingPayments.isEmpty()) {
-            throw new IllegalStateException("Payment already completed for this booking");
+        try {
+            // Check if payment already exists
+            List<Payment> existingPayments = paymentRepository.findByBookingIdAndStatus(
+                    request.getBookingId(), PaymentStatus.SUCCESS);
+            if (!existingPayments.isEmpty()) {
+                throw new IllegalStateException("Payment already completed for this booking");
+            }
+            
+            log.info("Using payment provider: {}", paymentProvider.getProviderName());
+            PaymentLinkResponse response = paymentProvider.createPaymentLink(request);
+            
+            // Save payment record
+            Payment payment = Payment.builder()
+                    .bookingId(request.getBookingId())
+                    .patientId(request.getPatientId())
+                    .amount(request.getAmount())
+                    .currency(request.getCurrency())
+                    .status(PaymentStatus.PENDING)
+                    .provider(defaultProvider)
+                    .paymentLinkId(response.getPaymentLinkId())
+                    .paymentLink(response.getPaymentLink())
+                    .providerOrderId(response.getProviderOrderId())
+                    .description(request.getDescription())
+                    .build();
+            
+            paymentRepository.save(payment);
+            
+            log.info("Payment link created: {} for booking: {}", response.getPaymentLinkId(), request.getBookingId());
+            return response;
+        } catch (Exception e) {
+            log.error("Error creating payment link for booking {}", request.getBookingId(), e);
+            throw e;
         }
-        
-        PaymentLinkResponse response = paymentProvider.createPaymentLink(request);
-        
-        // Save payment record
-        Payment payment = Payment.builder()
-                .bookingId(request.getBookingId())
-                .patientId(request.getPatientId())
-                .amount(request.getAmount())
-                .currency(request.getCurrency())
-                .status(PaymentStatus.PENDING)
-                .provider(defaultProvider)
-                .paymentLinkId(response.getPaymentLinkId())
-                .paymentLink(response.getPaymentLink())
-                .providerOrderId(response.getProviderOrderId())
-                .description(request.getDescription())
-                .build();
-        
-        paymentRepository.save(payment);
-        
-        log.info("Payment link created: {} for booking: {}", response.getPaymentLinkId(), request.getBookingId());
-        return response;
     }
     
     @Transactional

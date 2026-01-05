@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "bookings")
@@ -21,13 +22,13 @@ public class Booking {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "booking_number", unique = true, nullable = false, length = 50)
+    @Column(name = "booking_number", unique = true, length = 50)
     private String bookingNumber;
 
     @Column(name = "doctor_id", nullable = false)
     private Long doctorId;
 
-    @Column(name = "patient_id", nullable = false)
+    @Column(name = "patient_id") // Made nullable as patient might be unregistered? No, usually linked.
     private Long patientId;
 
     @Column(name = "slot_id")
@@ -68,6 +69,31 @@ public class Booking {
 
     @Column(name = "cancelled_at")
     private LocalDateTime cancelledAt;
+    
+    // New Fields
+    @Column(name = "patient_name")
+    private String patientName;
+    
+    @Column(name = "patient_phone")
+    private String patientPhone;
+    
+    @Column(name = "address_id")
+    private Long addressId;
+    
+    @Column(name = "doctor_notes", columnDefinition = "TEXT")
+    private String doctorNotes;
+    
+    @Column(name = "disease_description", columnDefinition = "TEXT")
+    private String diseaseDescription;
+    
+    @Column(name = "payment_link_url", columnDefinition = "TEXT")
+    private String paymentLinkUrl;
+    
+    @Column(name = "total_amount")
+    private BigDecimal totalAmount;
+    
+    @Column(name = "completed_at")
+    private LocalDateTime completedAt;
 
     @PrePersist
     protected void onCreate() {
@@ -83,8 +109,9 @@ public class Booking {
     public enum BookingStatus {
         PENDING,      // Waiting for doctor approval
         CONFIRMED,    // Approved by doctor
+        ACCEPTED,     // Synonym for CONFIRMED used in some flows
         CANCELLED,    // Cancelled
-        COMPLETED     // Appointment completed
+        COMPLETED,    // Appointment completed
+        PAID          // Paid
     }
 }
-
