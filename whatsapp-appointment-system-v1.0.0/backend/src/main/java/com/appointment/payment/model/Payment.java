@@ -20,11 +20,26 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "booking_id", nullable = false)
+    @Column(name = "clinic_id", nullable = false)
+    @Builder.Default
+    private Long clinicId = 1L;
+
+    @Column(name = "booking_id")
     private Long bookingId;
+
+    @Column(name = "consultation_id")
+    private Long consultationId;
 
     @Column(name = "patient_id", nullable = false)
     private Long patientId;
+
+    @Column(name = "payment_mode", length = 30)
+    @Builder.Default
+    private String paymentMode = "CASH";
+
+    @Column(name = "discount_amount", precision = 10, scale = 2)
+    @Builder.Default
+    private BigDecimal discountAmount = BigDecimal.ZERO;
 
     @Column(name = "amount", nullable = false, precision = 10, scale = 2)
     private BigDecimal amount;

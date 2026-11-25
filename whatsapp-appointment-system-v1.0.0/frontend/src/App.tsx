@@ -8,6 +8,10 @@ import PendingRequests from './pages/PendingRequests';
 import Appointments from './pages/Appointments';
 import Availability from './pages/Availability';
 import Billing from './pages/Billing';
+import ReceptionistDesk from './pages/ReceptionistDesk';
+import FollowUpWorklist from './pages/FollowUpWorklist';
+import InquiryCRM from './pages/InquiryCRM';
+import ClinicSettings from './pages/ClinicSettings';
 import PrivateRoute from './components/PrivateRoute';
 
 const theme = createTheme({
@@ -65,6 +69,38 @@ function App() {
             element={
               <PrivateRoute>
                 <Billing />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/reception"
+            element={
+              <PrivateRoute>
+                <ReceptionistDesk />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/follow-ups"
+            element={
+              <PrivateRoute>
+                <FollowUpWorklist />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/inquiries"
+            element={
+              <PrivateRoute>
+                <InquiryCRM />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/clinic-settings"
+            element={
+              <PrivateRoute>
+                <ClinicSettings />
               </PrivateRoute>
             }
           />

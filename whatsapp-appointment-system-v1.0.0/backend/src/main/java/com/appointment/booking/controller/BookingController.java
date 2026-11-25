@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/bookings")
 @RequiredArgsConstructor
 @Tag(name = "Booking", description = "Booking management APIs")
+@CrossOrigin(origins = "http://localhost:3000")
 public class BookingController {
     
     private final BookingService bookingService;
@@ -95,6 +96,41 @@ public class BookingController {
         return ResponseEntity.ok(bookings.stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList()));
+    }
+
+    @GetMapping
+    @Operation(summary = "Get bookings filtered by clinic, date, doctor, or status")
+    public ResponseEntity<List<Booking>> getBookings(
+            @RequestParam(required = false, defaultValue = "1") Long clinicId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @RequestParam(required = false) Long doctorId,
+            @RequestParam(required = false) Booking.BookingStatus status
+    ) {
+        return ResponseEntity.ok(bookingService.getFilteredBookings(clinicId, date, doctorId, status));
+    }
+
+    @PostMapping("/{bookingId}/reschedule")
+    @Operation(summary = "Reschedule an appointment to a new date and time")
+    public ResponseEntity<Booking> rescheduleBooking(
+            @PathVariable Long bookingId,
+            @RequestBody java.util.Map<String, String> body
+    ) {
+        LocalDate newDate = LocalDate.parse(body.get("newDate"));
+        java.time.LocalTime newStartTime = body.get("newStartTime") != null ? java.time.LocalTime.parse(body.get("newStartTime")) : null;
+        java.time.LocalTime newEndTime = body.get("newEndTime") != null ? java.time.LocalTime.parse(body.get("newEndTime")) : null;
+        String reason = body.get("reason");
+
+        return ResponseEntity.ok(bookingService.rescheduleBooking(bookingId, newDate, newStartTime, newEndTime, reason));
+    }
+
+    @PostMapping("/{bookingId}/cancel")
+    @Operation(summary = "Cancel an appointment with reason")
+    public ResponseEntity<Booking> cancelBooking(
+            @PathVariable Long bookingId,
+            @RequestBody(required = false) java.util.Map<String, String> body
+    ) {
+        String reason = body != null ? body.get("reason") : "Cancelled by clinic";
+        return ResponseEntity.ok(bookingService.cancelBooking(bookingId, reason));
     }
     
     private BookingResponse mapToResponse(Booking booking) {

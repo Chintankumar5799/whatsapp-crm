@@ -230,7 +230,7 @@
                 <configuration>
                     <url>jdbc:postgresql://localhost:5432/appointment_db</url>
                     <user>postgres</user>
-                    <password>1234</password>
+                    <password>4321</password>
                 </configuration>
             </plugin>
         </plugins>

@@ -36,6 +36,13 @@ public class User {
     @Column(name = "role", nullable = false)
     private UserRole role;
 
+    @Column(name = "clinic_id")
+    @Builder.Default
+    private Long clinicId = 1L;
+
+    @Column(name = "registration_number", length = 100)
+    private String registrationNumber;
+
     @Column(name = "doctor_id")
     private Long doctorId; // Legacy or external reference
 
@@ -59,6 +66,9 @@ public class User {
     @Column(name = "consultation_fee")
     private BigDecimal consultationFee;
 
+    @Column(name = "old_case_fee")
+    private BigDecimal oldCaseFee;
+
     @Column(name = "bio", columnDefinition = "TEXT")
     private String bio;
 
@@ -80,9 +90,16 @@ public class User {
     }
 
     public enum UserRole {
-        DOCTOR,
+        SUPER_ADMIN,
         ADMIN,
+        DOCTOR,
+        RECEPTIONIST,
+        NURSE_COMPOUNDER,
         STAFF,
         PATIENT
+    }
+
+    public String getFullName() {
+        return name != null && !name.trim().isEmpty() ? name : username;
     }
 }

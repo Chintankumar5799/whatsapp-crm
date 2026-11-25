@@ -92,6 +92,25 @@ public class Booking {
     @Column(name = "total_amount")
     private BigDecimal totalAmount;
     
+    @Column(name = "clinic_id")
+    @Builder.Default
+    private Long clinicId = 1L;
+
+    @Column(name = "case_type", length = 20)
+    @Builder.Default
+    private String caseType = "NEW_CASE";
+
+    @Column(name = "appointment_source", length = 50)
+    @Builder.Default
+    private String appointmentSource = "ONLINE";
+
+    @Column(name = "fee_override")
+    @Builder.Default
+    private Boolean feeOverride = false;
+
+    @Column(name = "fee_override_reason")
+    private String feeOverrideReason;
+
     @Column(name = "completed_at")
     private LocalDateTime completedAt;
 
@@ -110,8 +129,13 @@ public class Booking {
         PENDING,      // Waiting for doctor approval
         CONFIRMED,    // Approved by doctor
         ACCEPTED,     // Synonym for CONFIRMED used in some flows
-        CANCELLED,    // Cancelled
+        WAITING,      // Arrived at clinic, waiting in OPD queue
+        IN_CONSULTATION, // Currently consulting with doctor
         COMPLETED,    // Appointment completed
-        PAID          // Paid
+        CANCELLED,    // Cancelled
+        REJECTED,     // Rejected
+        NO_SHOW,      // Patient did not show up
+        PAID,         // Paid
+        FAILED        // Payment/Booking failed
     }
 }

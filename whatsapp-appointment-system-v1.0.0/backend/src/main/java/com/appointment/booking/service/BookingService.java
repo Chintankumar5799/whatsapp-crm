@@ -96,6 +96,42 @@ public class BookingService {
     public Booking cancelBooking(Long bookingId, String reason) {
         return rejectBooking(bookingId, reason);
     }
+
+    @Transactional
+    public Booking rescheduleBooking(Long bookingId, LocalDate newDate, java.time.LocalTime newStartTime, java.time.LocalTime newEndTime, String reason) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new IllegalArgumentException("Booking not found: " + bookingId));
+
+        if (booking.getSlotId() != null) {
+            slotService.releaseSlot(booking.getSlotId());
+            booking.setSlotId(null);
+        }
+
+        booking.setBookingDate(newDate);
+        if (newStartTime != null) booking.setStartTime(newStartTime);
+        if (newEndTime != null) booking.setEndTime(newEndTime);
+        booking.setStatus(BookingStatus.CONFIRMED);
+        booking.setNotes((booking.getNotes() != null ? booking.getNotes() + " | " : "") + "Rescheduled: " + (reason != null ? reason : "Patient requested"));
+
+        log.info("Booking {} rescheduled to {} at {}", booking.getBookingNumber(), newDate, newStartTime);
+        return bookingRepository.save(booking);
+    }
+
+    public List<Booking> getFilteredBookings(Long clinicId, LocalDate date, Long doctorId, BookingStatus status) {
+        return bookingRepository.findAll().stream()
+                .filter(b -> clinicId == null || clinicId.equals(b.getClinicId()))
+                .filter(b -> date == null || date.equals(b.getBookingDate()))
+                .filter(b -> doctorId == null || doctorId.equals(b.getDoctorId()))
+                .filter(b -> status == null || status.equals(b.getStatus()))
+                .sorted((b1, b2) -> {
+                    if (b1.getBookingDate() == null || b2.getBookingDate() == null) return 0;
+                    int c = b2.getBookingDate().compareTo(b1.getBookingDate());
+                    if (c != 0) return c;
+                    if (b1.getStartTime() == null || b2.getStartTime() == null) return 0;
+                    return b1.getStartTime().compareTo(b2.getStartTime());
+                })
+                .collect(Collectors.toList());
+    }
     
     public List<Booking> getDoctorBookingsForDate(Long doctorId, LocalDate date) {
         // Return all bookings for dashboard visibility (including COMPLETED/PAID)

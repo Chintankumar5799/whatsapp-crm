@@ -87,10 +87,11 @@ public class DoctorDashboardController {
     @Operation(summary = "Get chart data")
     public ResponseEntity<DashboardMetricsDto.ChartData> getChartData(
             @RequestParam Long doctorId,
-            @RequestParam String period, // "daily" or "weekly"
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate) {
+            @RequestParam(required = false, defaultValue = "7days") String period, // "today", "7days", "month", "custom"
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
         DashboardMetricsDto.ChartData chartData = metricsService.getChartData(
-                doctorId, period, startDate != null ? startDate : LocalDate.now());
+                doctorId, period, startDate != null ? startDate : LocalDate.now(), endDate);
         return ResponseEntity.ok(chartData);
     }
 

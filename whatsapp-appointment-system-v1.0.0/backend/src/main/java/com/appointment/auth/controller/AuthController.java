@@ -44,8 +44,10 @@ public class AuthController {
         return ResponseEntity.ok(LoginResponse.builder()
                 .token(token)
                 .username(user.getUsername())
+                .name(user.getFullName())
                 .role(user.getRole().name())
                 .userId(user.getId())
+                .clinicId(user.getClinicId())
                 .build());
     }
 

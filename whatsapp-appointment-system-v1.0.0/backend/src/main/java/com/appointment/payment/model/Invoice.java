@@ -23,10 +23,17 @@ public class Invoice {
     @Column(name = "invoice_number", unique = true, nullable = false, length = 50)
     private String invoiceNumber;
 
-    @Column(name = "booking_id", nullable = false)
+    @Column(name = "clinic_id", nullable = false)
+    @Builder.Default
+    private Long clinicId = 1L;
+
+    @Column(name = "booking_id")
     private Long bookingId;
 
-    @Column(name = "payment_id", nullable = false)
+    @Column(name = "consultation_id")
+    private Long consultationId;
+
+    @Column(name = "payment_id")
     private Long paymentId;
 
     @Column(name = "patient_id", nullable = false)
@@ -35,8 +42,22 @@ public class Invoice {
     @Column(name = "doctor_id", nullable = false)
     private Long doctorId;
 
+    @Column(name = "patient_name")
+    private String patientName;
+
+    @Column(name = "doctor_name")
+    private String doctorName;
+
+    @Column(name = "payment_mode", length = 30)
+    @Builder.Default
+    private String paymentMode = "CASH";
+
     @Column(name = "amount", nullable = false, precision = 10, scale = 2)
     private BigDecimal amount;
+
+    @Column(name = "discount_amount", precision = 10, scale = 2)
+    @Builder.Default
+    private BigDecimal discountAmount = BigDecimal.ZERO;
 
     @Column(name = "tax_amount", precision = 10, scale = 2)
     @Builder.Default
@@ -44,6 +65,9 @@ public class Invoice {
 
     @Column(name = "total_amount", nullable = false, precision = 10, scale = 2)
     private BigDecimal totalAmount;
+
+    @Transient
+    private java.util.List<InvoiceItem> items;
 
     @Column(name = "currency", nullable = false, length = 3)
     @Builder.Default
